@@ -49,8 +49,6 @@ struct Event
 class Item
 {
   friend class Page;
-  friend class HeroPage;
-  friend class ListPage;
 
 protected:
   SH1106Wire *m_display;
@@ -60,6 +58,7 @@ protected:
   virtual void draw(u_int16_t idx) = 0;
   virtual void drawHighlight(u_int16_t idx) = 0;
   virtual void drawValueHighlight(u_int16_t idx) = 0;
+  void syncDisplay(SH1106Wire *display) { m_display = display; }
 
 public:
   char *value;
@@ -84,8 +83,6 @@ public:
 
 class HeroPageItem : public Item
 {
-  friend class HeroPage;
-
 private:
   void draw(u_int16_t idx) override;
   void drawHighlight(u_int16_t idx) override;
@@ -143,6 +140,13 @@ protected:
 
   void (*onSave)();
   void (*onExit)();
+
+  // Helper functions to call Item's non-public methods from Page subclass without declaring them as friend.
+  void item_onEvent(Item &item, Event &event) { item.onEvent(event); }
+  void item_syncDisplay(Item &item) { item.syncDisplay(m_display); }
+  void item_draw(Item &item, u_int16_t idx) { item.draw(idx); }
+  void item_drawHighlight(Item &item, u_int16_t idx) { item.drawHighlight(idx); }
+  void item_drawValueHighlight(Item &item, u_int16_t idx) { item.drawValueHighlight(idx); }
 
 public:
   Page(const unsigned char *icon);

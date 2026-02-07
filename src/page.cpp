@@ -155,7 +155,7 @@ void ListPage::start()
   for (Item *item : m_pageItems)
   {
     Event initEvent = {EVENT_EMPTY, 0};
-    item->onEvent(initEvent);
+    item_onEvent(*item, initEvent);
   }
 }
 
@@ -236,7 +236,7 @@ void Page::disableSaveActions()
 void ListPage::addItem(PageItem &item)
 {
   m_pageItems.push_back(&item);
-  item.m_display = this->m_display;
+  item_syncDisplay(item);
 
   if (m_pageItems.size() == 1)
   {
@@ -288,19 +288,19 @@ void ListPage::drawItems()
   for (Item *item : enabledItems)
   {
     DEBUG_SIMPLEUI("Page::drawItem: %s\n", item->m_label);
-    item->draw(drawIdx);
+    item_draw(*item, drawIdx);
 
     if (item == *m_currentItemIt)
     {
       if (m_context == PAGE)
       {
         DEBUG_SIMPLEUI("Page::drawItem: *%s\n", item->m_label);
-        item->drawHighlight(drawIdx);
+        item_drawHighlight(*item, drawIdx);
       }
       else if (m_context == ITEM)
       {
         DEBUG_SIMPLEUI("Page::drawItem: **%s\n", item->m_label);
-        item->drawValueHighlight(drawIdx);
+        item_drawValueHighlight(*item, drawIdx);
       }
     }
 
@@ -356,7 +356,7 @@ void ListPage::onItemEvent(Event &event)
   {
   case ROTARY_EVENT_CW:
   case ROTARY_EVENT_CCW:
-    (*m_currentItemIt)->onEvent(event);
+    item_onEvent(**m_currentItemIt, event);
     break;
   case ROTARY_EVENT_PUSH:
     DEBUG_SIMPLEUI("Page::onPush ITEM -> PAGE\n");
@@ -371,7 +371,7 @@ void ListPage::syncDisplay()
 {
   for (Item *item : m_pageItems)
   {
-    item->m_display = this->m_display;
+    item_syncDisplay(*item);
   }
 }
 
@@ -384,13 +384,13 @@ HeroPage::HeroPage(const unsigned char *icon)
 void HeroPage::addItem(HeroPageItem &pageItem)
 {
   m_currentItem = &pageItem;
-  pageItem.m_display = this->m_display;
+  item_syncDisplay(pageItem);
 }
 
 void HeroPage::start()
 {
   Event initEvent = {EVENT_EMPTY, 0};
-  m_currentItem->onEvent(initEvent);
+  item_onEvent(*m_currentItem, initEvent);
 }
 
 void HeroPage::reset()
@@ -418,7 +418,7 @@ void HeroPage::onItemEvent(Event &event)
   {
   case ROTARY_EVENT_CW:
   case ROTARY_EVENT_CCW:
-    m_currentItem->onEvent(event);
+    item_onEvent(*m_currentItem, event);
     break;
   case ROTARY_EVENT_PUSH:
     if (m_enableSaveActions)
@@ -442,12 +442,12 @@ void HeroPage::drawItems()
   DEBUG_SIMPLEUI("HeroPage::drawItems\n");
   if (m_currentItem->isEnabled())
   {
-    m_currentItem->draw(0); // HeroPageItem doesn't use idx
+    item_draw(*m_currentItem, 0); // HeroPageItem doesn't use idx
 
     if (m_context == PAGE || m_context == ITEM)
     {
       DEBUG_SIMPLEUI("HeroPage::drawItems: ValueHighlight %s\n", m_currentItem->m_label);
-      m_currentItem->drawValueHighlight(0);
+      item_drawValueHighlight(*m_currentItem, 0);
     }
   }
 }
@@ -456,6 +456,6 @@ void HeroPage::syncDisplay()
 {
   if (m_currentItem)
   {
-    m_currentItem->m_display = m_display;
+    item_syncDisplay(*m_currentItem);
   }
 }
