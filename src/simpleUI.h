@@ -50,6 +50,15 @@ class Item
 {
   friend class Page;
 
+public:
+  char *value;
+  const char *m_label;
+
+  Item(const char *label, void (*onValueChange)(Item *item, const Event *event));
+  void (*onValueChange)(Item *item, const Event *event);
+  bool isEnabled() const { return m_enabled; }
+  void setEnabled(bool enabled) { m_enabled = enabled; }
+
 protected:
   SH1106Wire *m_display;
   bool m_enabled;
@@ -59,43 +68,35 @@ protected:
   virtual void drawHighlight(u_int16_t idx) = 0;
   virtual void drawValueHighlight(u_int16_t idx) = 0;
   void syncDisplay(SH1106Wire *display) { m_display = display; }
-
-public:
-  char *value;
-  const char *m_label;
-
-  Item(const char *label, void (*onValueChange)(Item *item, const Event *event));
-  void (*onValueChange)(Item *item, const Event *event);
-  bool isEnabled() const { return m_enabled; }
-  void setEnabled(bool enabled) { m_enabled = enabled; }
 };
 
 class PageItem : public Item
 {
+public:
+  PageItem(const char *label, void (*onValueChange)(Item *item, const Event *event));
+
 private:
   void draw(u_int16_t idx) override;
   void drawHighlight(u_int16_t idx) override;
   void drawValueHighlight(u_int16_t idx) override;
-
-public:
-  PageItem(const char *label, void (*onValueChange)(Item *item, const Event *event));
 };
 
 class HeroPageItem : public Item
 {
+public:
+  HeroPageItem(const char *label, void (*onValueChange)(Item *item, const Event *event));
+
 private:
   void draw(u_int16_t idx) override;
   void drawHighlight(u_int16_t idx) override;
   void drawValueHighlight(u_int16_t idx) override;
-
-public:
-  HeroPageItem(const char *label, void (*onValueChange)(Item *item, const Event *event));
 };
 
 class Navbar
 {
   friend class Container;
 
+public:
 private:
   SH1106Wire *m_display;
   std::vector<Page *> m_pages;
@@ -106,16 +107,20 @@ private:
   void addPage(Page &page);
   void draw(const Page &currentPage);
   void onEvent(Event &event);
-
-public:
 };
 
 class Page
 {
   friend class Container;
 
-private:
-  void checkAndYield();
+public:
+  Page(const unsigned char *icon);
+  void enable(bool enabled) { m_enabled = enabled; }
+  bool enabled() const { return m_enabled; }
+  void enableSaveActions(void (*onSave)(), void (*onExit)());
+  void disableSaveActions();
+
+  const unsigned char *getIcon() const { return m_icon; }
 
 protected:
   SH1106Wire *m_display;
@@ -148,18 +153,16 @@ protected:
   void item_drawHighlight(Item &item, u_int16_t idx) { item.drawHighlight(idx); }
   void item_drawValueHighlight(Item &item, u_int16_t idx) { item.drawValueHighlight(idx); }
 
-public:
-  Page(const unsigned char *icon);
-  void enable(bool enabled) { m_enabled = enabled; }
-  bool enabled() const { return m_enabled; }
-  void enableSaveActions(void (*onSave)(), void (*onExit)());
-  void disableSaveActions();
-
-  const unsigned char *getIcon() const { return m_icon; }
+private:
+  void checkAndYield();
 };
 
 class HeroPage : public Page
 {
+public:
+  HeroPage(const unsigned char *icon);
+  void addItem(HeroPageItem &pageItem);
+
 private:
   HeroPageItem *m_currentItem;
 
@@ -169,14 +172,14 @@ private:
   void reset() override;
   void onPageEvent(Event &event) override;
   void onItemEvent(Event &event) override;
-
-public:
-  HeroPage(const unsigned char *icon);
-  void addItem(HeroPageItem &pageItem);
 };
 
 class ListPage : public Page
 {
+public:
+  ListPage(const unsigned char *icon) : Page(icon) {}
+  void addItem(PageItem &pageItem);
+
 private:
   std::list<PageItem *> m_pageItems;
   std::list<PageItem *>::iterator m_currentItemIt;
@@ -189,10 +192,6 @@ private:
   void onItemEvent(Event &event) override;
   void syncDisplay() override;
   void reset() override;
-
-public:
-  ListPage(const unsigned char *icon) : Page(icon) {}
-  void addItem(PageItem &pageItem);
 };
 
 class RotaryDebounce;
@@ -202,10 +201,24 @@ class Container
 {
   friend class Navbar;
   friend class Page;
-  friend class ListPage;
-  friend class HeroPage;
   friend void onContainerRotaryEvent(ROTARY_EVENT rEvent);
   friend void onContainerSwitchEvent(u_int8_t pinState);
+
+public:
+  // Singleton
+  static Container &getInstance(SH1106Wire &display);
+  static Container &getInstance(SH1106Wire &display, u_int8_t tra, u_int8_t trb, u_int8_t psh);
+  Container(const Container &) = delete;
+  Container &operator=(const Container &) = delete;
+
+  void initDisplay(bool flipVertical = true);
+  void addPage(Page &childPage);
+  void setCurrentPage(Page &newPage);
+  void onEvent(Event &event);
+  void enableScreenSaver(u_int8_t timeoutSec);
+  void disableScreenSaver();
+  void start();
+  void flipDisplay(bool flipVertical);
 
 private:
   struct WatchdogTaskParams
@@ -242,22 +255,6 @@ private:
   Container(SH1106Wire &display);
   Container(SH1106Wire &display, u_int8_t tra, u_int8_t trb, u_int8_t psh);
   ~Container();
-
-public:
-  // Singleton factory methods
-  static Container &getInstance(SH1106Wire &display);
-  static Container &getInstance(SH1106Wire &display, u_int8_t tra, u_int8_t trb, u_int8_t psh);
-  Container(const Container &) = delete;
-  Container &operator=(const Container &) = delete;
-
-  void initDisplay(bool flipVertical = true);
-  void addPage(Page &childPage);
-  void setCurrentPage(Page &newPage);
-  void onEvent(Event &event);
-  void enableScreenSaver(u_int8_t timeoutSec);
-  void disableScreenSaver();
-  void start();
-  void flipDisplay(bool flipVertical);
 };
 
 class RotaryDebounce
