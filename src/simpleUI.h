@@ -2,6 +2,7 @@
 #define Futojin_SIMPLEUI_H
 
 #include "SH1106Wire.h"
+#include "internal.h"
 #include "icon.h"
 #include <vector>
 #include <list>
@@ -10,16 +11,6 @@
 #ifndef DEBUG_SIMPLEUI
 #define DEBUG_SIMPLEUI(...)
 #endif
-
-enum CONTEXT
-{
-  NONE,
-  NAVBAR,
-  PAGE,
-  ITEM,
-  SAVE,
-  EXIT
-};
 
 enum ROTARY_EVENT
 {
@@ -34,11 +25,8 @@ enum Event_ID
   EVENT_PIR,
   EVENT_TIM,
   EVENT_ROT,
-  EVENT_YIELD // TODO: internal event
+  EVENT_YIELD // internal event, do not use.
 };
-
-class Page;
-class Container;
 
 struct Event
 {
@@ -193,9 +181,6 @@ private:
   void syncDisplay() override;
   void reset() override;
 };
-
-class RotaryDebounce;
-class SwitchDebounce;
 
 class Container
 {
