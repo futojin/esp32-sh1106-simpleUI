@@ -57,7 +57,7 @@ void handleSwitchDebounceCallbackTask(void *param)
   }
 }
 
-SwitchDebounce::SwitchDebounce(u_int8_t pin, void (*onSwitchEvent)(u_int8_t pinState))
+SwitchDebounce::SwitchDebounce(u_int8_t pin, void (*onSwitchEvent)(const u_int8_t pinState))
     : m_pin(pin),
       m_debounceTimer(nullptr),
       onSwitchEvent(onSwitchEvent)

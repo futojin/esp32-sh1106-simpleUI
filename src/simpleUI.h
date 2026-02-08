@@ -252,7 +252,7 @@ public:
   /**
    * Note: Rotary encoder pins are assumed to be pulled up HIGH.
    */
-  RotaryDebounce(const u_int8_t tra, const u_int8_t trb, void (*onRotaryEvent)(ROTARY_EVENT event));
+  RotaryDebounce(const u_int8_t tra, const u_int8_t trb, void (*onRotaryEvent)(const ROTARY_EVENT event));
   ~RotaryDebounce();
   void start();
 
@@ -288,7 +288,7 @@ private:
     unsigned long startMs;
   } m_rotaryState;
 
-  void (*onRotaryEvent)(ROTARY_EVENT event);
+  void (*onRotaryEvent)(const ROTARY_EVENT event);
   void abInterrupt(unsigned long interruptMs);
   void resetState();
   void cw(int pinAState, int pinBState);
@@ -304,7 +304,7 @@ class SwitchDebounce
   friend void switchDebounce_timerCallback(TimerHandle_t xTimer);
 
 public:
-  SwitchDebounce(u_int8_t pin, void (*onSwitchEvent)(u_int8_t pinState));
+  SwitchDebounce(u_int8_t pin, void (*onSwitchEvent)(const u_int8_t pinState));
   ~SwitchDebounce();
   void start();
 
@@ -312,6 +312,6 @@ private:
   u_int8_t m_pin;
   int m_lastPinState;
   TimerHandle_t m_debounceTimer;
-  void (*onSwitchEvent)(u_int8_t pinState);
+  void (*onSwitchEvent)(const u_int8_t pinState);
 };
 #endif // Futojin_SIMPLEUI_H
