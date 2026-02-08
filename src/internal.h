@@ -1,3 +1,6 @@
+#ifndef Futojin_INTERNAL_H
+#define Futojin_INTERNAL_H
+
 enum CONTEXT
 {
   NONE,
@@ -12,3 +15,5 @@ class Page;
 class Container;
 class RotaryDebounce;
 class SwitchDebounce;
+
+#endif // Futojin_INTERNAL_H
