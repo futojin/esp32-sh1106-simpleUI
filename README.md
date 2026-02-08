@@ -12,7 +12,7 @@ It often can be bought USD$3-5 each (2026). Especially on bundle deals.
 * Internally context and state aware. You don't need to track where you are in the menu system. Provide a callback to get notified of your own event.
 * Easy to extend with your custom pages and items.
 * Uses only the encoder push button to navigate through the menu system.
-* Advanced debouncing algorithm for rotary encoders and buttons.
+* Advanced debouncing algorithm for [rotary encoders](https://github.com/futojin/esp32-sh1106-simpleUI/wiki/rotary-debouncing) and [switches](https://github.com/futojin/esp32-sh1106-simpleUI/wiki/switch-debouncing).
 * Built-in screen timeout. Prolong those cheap OLED displays life.
 
 ![alt text](docs/menu-hero.jpeg)
