@@ -304,9 +304,10 @@ class SwitchDebounce
   friend void switchDebounce_timerCallback(TimerHandle_t xTimer);
 
 public:
-  SwitchDebounce(u_int8_t pin, void (*onSwitchEvent)(const u_int8_t pinState));
+  SwitchDebounce(u_int8_t pin, void (*switchEventResponder)(const u_int8_t pinState));
   ~SwitchDebounce();
   void start();
+  int getPinState() const { return m_lastPinState; }
 
 private:
   u_int8_t m_pin;

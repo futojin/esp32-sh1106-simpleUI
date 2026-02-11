@@ -47,8 +47,8 @@ It often can be bought USD$3-5 each (2026). Especially on bundle deals.
 
 struct DisplayData
 {
-  uint8_t current_duty = 0; // LED brightness duty cycle (0-255)
-  bool flipDisplay = false; // Whether the display is flipped vertically
+  uint8_t current_duty = 0; // Hypothetical LED driver brightness duty cycle (0-255)
+  bool flipDisplay = false; // Whether this display is flipped vertically
 } displayData;
 
 // ##############################

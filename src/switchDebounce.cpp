@@ -15,6 +15,10 @@ void IRAM_ATTR switchDebounce_isr(void *arg)
   }
 
   SwitchDebounce *debounceInstance = (SwitchDebounce *)arg;
+  if (debounceInstance->onSwitchEvent == nullptr)
+  {
+    return;
+  }
 
   BaseType_t xHigherPriorityTaskWoken = pdFALSE;
   xTimerResetFromISR(debounceInstance->m_debounceTimer, &xHigherPriorityTaskWoken);
@@ -49,18 +53,21 @@ void handleSwitchDebounceCallbackTask(void *param)
     SwitchDebounce *debounceInstance;
     if (xQueueReceive(switchDebounceCallbackQueue, &debounceInstance, portMAX_DELAY))
     {
-      DEBUG_SIMPLEUI("SwitchDebounce Callback: pin %d state %d\n", debounceInstance->m_pin, debounceInstance->m_lastPinState);
-      DEBUG_SIMPLEUI("--------------------------------------------\n");
-      // Call the user-defined callback
-      debounceInstance->onSwitchEvent(debounceInstance->m_lastPinState);
+      if (debounceInstance->onSwitchEvent != nullptr)
+      {
+        DEBUG_SIMPLEUI("SwitchDebounce Callback: pin %d state %d\n", debounceInstance->m_pin, debounceInstance->m_lastPinState);
+        DEBUG_SIMPLEUI("--------------------------------------------\n");
+        // Call the user-defined callback
+        debounceInstance->onSwitchEvent(debounceInstance->m_lastPinState);
+      }
     }
   }
 }
 
-SwitchDebounce::SwitchDebounce(u_int8_t pin, void (*onSwitchEvent)(const u_int8_t pinState))
+SwitchDebounce::SwitchDebounce(u_int8_t pin, void (*switchEventResponder)(const u_int8_t pinState))
     : m_pin(pin),
       m_debounceTimer(nullptr),
-      onSwitchEvent(onSwitchEvent)
+      onSwitchEvent(switchEventResponder)
 {
   if (switchDebounceCallbackQueue == nullptr)
   {
