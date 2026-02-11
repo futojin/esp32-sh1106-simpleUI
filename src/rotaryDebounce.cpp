@@ -57,7 +57,7 @@ void handleRotaryCallbackTask(void *parameter)
   }
 }
 
-RotaryDebounce::RotaryDebounce(const u_int8_t pinA, const u_int8_t pinB, void (*rotaryEventResponder)(ROTARY_EVENT event))
+RotaryDebounce::RotaryDebounce(const u_int8_t pinA, const u_int8_t pinB, void (*rotaryEventResponder)(const ROTARY_EVENT event))
     : m_pinA(pinA),
       m_pinB(pinB),
       onRotaryEvent(rotaryEventResponder)
