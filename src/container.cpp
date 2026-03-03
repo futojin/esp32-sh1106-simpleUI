@@ -44,7 +44,9 @@ Container::Container(SH1106Wire &display)
       m_screenSaverTimeoutSec(0),                 // Initialize screen saver timeout to 0 (disabled)
       m_lastActivityMs(millis()),
       m_statusBar(display),
-      m_statusBarEnabled(false)
+      m_statusBarEnabled(false),
+      m_screenSaverActive(false),
+      m_overlayEnabled(true)
 {
   m_rotaryDebounce = nullptr;
   m_switchDebounce = nullptr;
@@ -146,18 +148,24 @@ void Container::setCurrentPage(Page &newPage)
 void Container::draw()
 {
   DEBUG_SIMPLEUI("Container::draw\n");
-  m_display->clear();
-  drawOverlay();
-  m_navbar.draw(*m_currentPage);
-  if (m_currentPage)
+  if (!m_screenSaverActive)
   {
-    m_currentPage->draw();
+    m_display->clear();
+    if (m_overlayEnabled)
+    {
+      drawOverlay();
+    }
+    m_navbar.draw(*m_currentPage);
+    if (m_currentPage)
+    {
+      m_currentPage->draw();
+    }
+    if (m_statusBarEnabled)
+    {
+      m_statusBar.draw();
+    }
+    m_display->display();
   }
-  if (m_statusBarEnabled)
-  {
-    m_statusBar.draw();
-  }
-  m_display->display();
 }
 
 void Container::drawOverlay()
@@ -297,6 +305,11 @@ void Container::disableScreenSaver()
   m_screenSaverTimeoutSec = 0;
 }
 
+void Container::enableOverlay(bool enabled)
+{
+  m_overlayEnabled = enabled;
+}
+
 void Container::onWatchdogTask(void *parameter)
 {
   WatchdogTaskParams *params = (WatchdogTaskParams *)parameter;
@@ -327,6 +340,7 @@ void Container::screenSaverTask(WatchdogTaskParams *params)
   u_int32_t elapsedMs = currentTime - lastActivity;
   if (elapsedMs >= timeoutMs)
   {
+    m_screenSaverActive = true;
     if (m_screenBrightness > MIN_DISPLAY_BRIGHTNESS)
     {
       m_screenBrightness = MIN_DISPLAY_BRIGHTNESS;
@@ -336,6 +350,10 @@ void Container::screenSaverTask(WatchdogTaskParams *params)
       drawOverlay();
       m_display->display();
     }
+  }
+  else
+  {
+    m_screenSaverActive = false;
   }
 }
 

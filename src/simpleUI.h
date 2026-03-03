@@ -240,11 +240,13 @@ public:
   Container &operator=(const Container &) = delete;
 
   void initDisplay(bool flipVertical = true);
+  void draw();
   void addPage(Page &childPage);
   void setCurrentPage(Page &newPage);
   void onEvent(Event &event);
   void enableScreenSaver(u_int8_t timeoutSec);
   void disableScreenSaver();
+  void enableOverlay(bool enabled);
   void start();
   void flipDisplay(bool flipVertical);
   void addStatus(Status &status);
@@ -270,12 +272,13 @@ private:
   RotaryDebounce *m_rotaryDebounce;
   SwitchDebounce *m_switchDebounce;
   bool m_statusBarEnabled;
+  bool m_screenSaverActive;
+  bool m_overlayEnabled;
 
   static WatchdogTaskParams s_watchdogTaskParams;
   static Container *s_containerInstance;
 
   void drawOverlay();
-  void draw();
   void trackCurrentPage(ROTARY_EVENT rEvent);
   void onEventYield(Event &event);
   void createWatchdogTask();

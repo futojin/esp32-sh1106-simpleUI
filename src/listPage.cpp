@@ -1,6 +1,6 @@
 #include "simpleUI.h"
 
-#define DRAW_LIST_SIZE 2
+#define DRAW_LIST_SIZE 3
 
 void ListPage::addItem(PageItem &item)
 {
@@ -15,18 +15,22 @@ void ListPage::addItem(PageItem &item)
 
 void ListPage::drawItems(uint16_t offsetX, uint16_t offsetY)
 {
+  uint8_t listSize = DRAW_LIST_SIZE;
   if (m_pageItems.empty())
   {
     return; // Nothing to draw
   }
   DEBUG_SIMPLEUI("Page::drawItems\n");
-
+  if (m_container->isStatusBarEnabled())
+  {
+    listSize--;
+  }
   // Collect enabled items to draw
   std::vector<Item *> enabledItems;
 
   // First, collect previous enabled items with aim to have the currentItem in the middle of the screen, if possible
   auto prevIt = m_currentItemIt;
-  while (prevIt != m_pageItems.begin() && enabledItems.size() < (DRAW_LIST_SIZE / 2))
+  while (prevIt != m_pageItems.begin() && enabledItems.size() < (listSize / 2))
   {
     --prevIt;
     if ((*prevIt)->isEnabled())
@@ -43,7 +47,7 @@ void ListPage::drawItems(uint16_t offsetX, uint16_t offsetY)
 
   // Find next enabled items if we have space
   auto nextIt = m_currentItemIt;
-  while (nextIt != m_pageItems.end() && enabledItems.size() < DRAW_LIST_SIZE)
+  while (nextIt != m_pageItems.end() && enabledItems.size() < listSize)
   {
     ++nextIt;
     if (nextIt != m_pageItems.end() && (*nextIt)->isEnabled())
