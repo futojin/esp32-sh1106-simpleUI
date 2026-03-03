@@ -62,17 +62,17 @@ void HeroPage::onItemEvent(Event &event)
   }
 }
 
-void HeroPage::drawItems()
+void HeroPage::drawItems(uint16_t offsetX, uint16_t offsetY)
 {
   DEBUG_SIMPLEUI("HeroPage::drawItems\n");
   if (m_currentItem->isEnabled())
   {
-    item_draw(*m_currentItem, 0); // HeroPageItem doesn't use idx
+    item_draw(*m_currentItem, 0, offsetX, offsetY); // HeroPageItem doesn't use idx
 
     if (m_context == PAGE || m_context == ITEM)
     {
       DEBUG_SIMPLEUI("HeroPage::drawItems: ValueHighlight %s\n", m_currentItem->m_label);
-      item_drawValueHighlight(*m_currentItem, 0);
+      item_drawValueHighlight(*m_currentItem, 0, offsetX, offsetY);
     }
   }
 }

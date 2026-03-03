@@ -5,6 +5,7 @@
 #define MAX_DISPLAY_BRIGHTNESS 128
 #define MIN_DISPLAY_BRIGHTNESS 15
 #define MIN_SCREEN_SAVER_TIMEOUT_SEC 5
+#define STATUS_BAR_HEIGHT 13
 
 // Define static members
 Container::WatchdogTaskParams Container::s_watchdogTaskParams;
@@ -41,7 +42,9 @@ Container::Container(SH1106Wire &display)
       m_watchdogTaskHandle(nullptr),
       m_screenBrightness(MAX_DISPLAY_BRIGHTNESS), // Initialize to full brightness
       m_screenSaverTimeoutSec(0),                 // Initialize screen saver timeout to 0 (disabled)
-      m_lastActivityMs(millis())
+      m_lastActivityMs(millis()),
+      m_statusBar(display),
+      m_statusBarEnabled(false)
 {
   m_rotaryDebounce = nullptr;
   m_switchDebounce = nullptr;
@@ -114,6 +117,7 @@ void Container::addPage(Page &childPage)
   childPage.syncDisplay();
   m_pages.push_back(&childPage);
   m_navbar.addPage(childPage);
+  updatePageOffset();
   childPage.m_container = this;
 
   if (m_currentPage == nullptr) // If this is the first page, assume current
@@ -148,6 +152,10 @@ void Container::draw()
   if (m_currentPage)
   {
     m_currentPage->draw();
+  }
+  if (m_statusBarEnabled)
+  {
+    m_statusBar.draw();
   }
   m_display->display();
 }
@@ -366,4 +374,20 @@ void Container::flipDisplay(bool flipVertical)
     m_display->resetOrientation();
   }
   draw();
+}
+
+void Container::addStatus(Status &status)
+{
+  m_statusBarEnabled = true;
+  m_statusBar.addStatus(status);
+  updatePageOffset();
+}
+
+void Container::updatePageOffset()
+{
+  uint16_t offsetY = m_statusBarEnabled ? STATUS_BAR_HEIGHT : 0;
+  for (Page *page : m_pages)
+  {
+    page->setOffset(0, offsetY);
+  }
 }

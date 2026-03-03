@@ -52,9 +52,9 @@ protected:
   bool m_enabled;
 
   void onEvent(Event &event);
-  virtual void draw(u_int16_t idx) = 0;
-  virtual void drawHighlight(u_int16_t idx) = 0;
-  virtual void drawValueHighlight(u_int16_t idx) = 0;
+  virtual void draw(u_int16_t idx, uint16_t offsetX = 0, uint16_t offsetY = 0) = 0;
+  virtual void drawHighlight(u_int16_t idx, uint16_t offsetX = 0, uint16_t offsetY = 0) = 0;
+  virtual void drawValueHighlight(u_int16_t idx, uint16_t offsetX = 0, uint16_t offsetY = 0) = 0;
   void syncDisplay(SH1106Wire *display) { m_display = display; }
 };
 
@@ -64,9 +64,9 @@ public:
   PageItem(const char *label, void (*onValueChange)(Item *item, const Event *event));
 
 private:
-  void draw(u_int16_t idx) override;
-  void drawHighlight(u_int16_t idx) override;
-  void drawValueHighlight(u_int16_t idx) override;
+  void draw(u_int16_t idx, uint16_t offsetX = 0, uint16_t offsetY = 0) override;
+  void drawHighlight(u_int16_t idx, uint16_t offsetX = 0, uint16_t offsetY = 0) override;
+  void drawValueHighlight(u_int16_t idx, uint16_t offsetX = 0, uint16_t offsetY = 0) override;
 };
 
 class HeroPageItem : public Item
@@ -75,9 +75,9 @@ public:
   HeroPageItem(const char *label, void (*onValueChange)(Item *item, const Event *event));
 
 private:
-  void draw(u_int16_t idx) override;
-  void drawHighlight(u_int16_t idx) override;
-  void drawValueHighlight(u_int16_t idx) override;
+  void draw(u_int16_t idx, uint16_t offsetX = 0, uint16_t offsetY = 0) override;
+  void drawHighlight(u_int16_t idx, uint16_t offsetX = 0, uint16_t offsetY = 0) override;
+  void drawValueHighlight(u_int16_t idx, uint16_t offsetX = 0, uint16_t offsetY = 0) override;
 };
 
 class Navbar
@@ -107,6 +107,7 @@ public:
   bool enabled() const { return m_enabled; }
   void enableSaveActions(void (*onSave)(), void (*onExit)());
   void disableSaveActions();
+  void setOffset(uint16_t offsetX, uint16_t offsetY);
 
   const unsigned char *getIcon() const { return m_icon; }
 
@@ -117,8 +118,10 @@ protected:
   CONTEXT m_context;
   bool m_enabled;
   bool m_enableSaveActions;
+  uint16_t m_offsetX;
+  uint16_t m_offsetY;
 
-  virtual void drawItems() = 0;
+  virtual void drawItems(uint16_t offsetX = 0, uint16_t offsetY = 0) = 0;
   virtual void syncDisplay() = 0;
   virtual void start() = 0;
   virtual void reset() = 0;
@@ -137,9 +140,9 @@ protected:
   // Helper functions to call Item's non-public methods from Page subclass without declaring them as friend.
   void item_onEvent(Item &item, Event &event) { item.onEvent(event); }
   void item_syncDisplay(Item &item) { item.syncDisplay(m_display); }
-  void item_draw(Item &item, u_int16_t idx) { item.draw(idx); }
-  void item_drawHighlight(Item &item, u_int16_t idx) { item.drawHighlight(idx); }
-  void item_drawValueHighlight(Item &item, u_int16_t idx) { item.drawValueHighlight(idx); }
+  void item_draw(Item &item, u_int16_t idx, uint16_t offsetX = 0, uint16_t offsetY = 0) { item.draw(idx, offsetX, offsetY); }
+  void item_drawHighlight(Item &item, u_int16_t idx, uint16_t offsetX = 0, uint16_t offsetY = 0) { item.drawHighlight(idx, offsetX, offsetY); }
+  void item_drawValueHighlight(Item &item, u_int16_t idx, uint16_t offsetX = 0, uint16_t offsetY = 0) { item.drawValueHighlight(idx, offsetX, offsetY); }
 
 private:
   void checkAndYield();
@@ -154,7 +157,7 @@ public:
 private:
   HeroPageItem *m_currentItem;
 
-  void drawItems() override;
+  void drawItems(uint16_t offsetX = 0, uint16_t offsetY = 0) override;
   void start() override;
   void syncDisplay() override;
   void reset() override;
@@ -174,12 +177,52 @@ private:
 
   bool nextItem();
   bool prevItem();
-  void drawItems() override;
+  void drawItems(uint16_t offsetX = 0, uint16_t offsetY = 0) override;
   void start() override;
   void onPageEvent(Event &event) override;
   void onItemEvent(Event &event) override;
   void syncDisplay() override;
   void reset() override;
+};
+
+class Status
+{
+public:
+  Status();
+
+  void setDisplay(SH1106Wire &display) { m_display = &display; }
+  void setPosition(uint16_t posX, uint16_t posY);
+  virtual void draw() = 0;
+
+protected:
+  uint16_t posX;
+  uint16_t posY;
+  SH1106Wire *m_display;
+};
+
+class StatusBar
+{
+public:
+  StatusBar(SH1106Wire &display);
+
+  void addStatus(Status &status);
+  void draw();
+
+private:
+  SH1106Wire *m_display;
+  std::vector<Status *> m_statuses;
+};
+
+class StatusText : public Status
+{
+public:
+  StatusText(const char *text);
+
+  void setText(const char *text) { m_text = text; }
+  void draw() override;
+
+private:
+  const char *m_text;
 };
 
 class Container
@@ -204,6 +247,8 @@ public:
   void disableScreenSaver();
   void start();
   void flipDisplay(bool flipVertical);
+  void addStatus(Status &status);
+  bool isStatusBarEnabled() const { return m_statusBarEnabled; }
 
 private:
   struct WatchdogTaskParams
@@ -214,6 +259,7 @@ private:
   SH1106Wire *m_display;
   Page *m_currentPage;
   Navbar m_navbar;
+  StatusBar m_statusBar;
   CONTEXT m_context;
   std::vector<Page *> m_pages;
   u_int8_t m_idx;
@@ -223,6 +269,7 @@ private:
   volatile unsigned long m_lastActivityMs;
   RotaryDebounce *m_rotaryDebounce;
   SwitchDebounce *m_switchDebounce;
+  bool m_statusBarEnabled;
 
   static WatchdogTaskParams s_watchdogTaskParams;
   static Container *s_containerInstance;
@@ -236,6 +283,7 @@ private:
   void screenSaverTask(WatchdogTaskParams *params);
   u_int8_t nextEnabledPage();
   u_int8_t previousEnabledPage();
+  void updatePageOffset();
 
   Container(SH1106Wire &display);
   Container(SH1106Wire &display, u_int8_t tra, u_int8_t trb, u_int8_t psh);

@@ -10,10 +10,16 @@ Page::Page(const unsigned char *icon)
 {
 }
 
+void Page::setOffset(uint16_t offsetX, uint16_t offsetY)
+{
+  m_offsetX = offsetX;
+  m_offsetY = offsetY;
+}
+
 void Page::draw()
 {
   DEBUG_SIMPLEUI("Page::draw\n");
-  drawItems();
+  drawItems(m_offsetX, m_offsetY);
   drawSaveActions();
 }
 

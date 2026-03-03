@@ -1,6 +1,6 @@
 #include "simpleUI.h"
 
-#define DRAW_LIST_SIZE 3 // TODO: items size is hardcoded to 3. Use screen size.
+#define DRAW_LIST_SIZE 2
 
 void ListPage::addItem(PageItem &item)
 {
@@ -13,7 +13,7 @@ void ListPage::addItem(PageItem &item)
   }
 }
 
-void ListPage::drawItems()
+void ListPage::drawItems(uint16_t offsetX, uint16_t offsetY)
 {
   if (m_pageItems.empty())
   {
@@ -57,19 +57,19 @@ void ListPage::drawItems()
   for (Item *item : enabledItems)
   {
     DEBUG_SIMPLEUI("Page::drawItem: %s\n", item->m_label);
-    item_draw(*item, drawIdx);
+    item_draw(*item, drawIdx, offsetX, offsetY);
 
     if (item == *m_currentItemIt)
     {
       if (m_context == PAGE)
       {
         DEBUG_SIMPLEUI("Page::drawItem: *%s\n", item->m_label);
-        item_drawHighlight(*item, drawIdx);
+        item_drawHighlight(*item, drawIdx, offsetX, offsetY);
       }
       else if (m_context == ITEM)
       {
         DEBUG_SIMPLEUI("Page::drawItem: **%s\n", item->m_label);
-        item_drawValueHighlight(*item, drawIdx);
+        item_drawValueHighlight(*item, drawIdx, offsetX, offsetY);
       }
     }
 
