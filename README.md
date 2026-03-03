@@ -7,7 +7,7 @@ It often can be bought USD$3-5 each (2026). Especially on bundle deals.
 ![alt text](docs/module-front.jpg) ![alt text](docs/module-iso.jpg)
 
 ## Features
-* Modular menu system. You deal with high level concepts like "Pages" and "Items" rather than line and pixel coordinates.
+* [Modular menu system](https://github.com/futojin/esp32-sh1106-simpleUI/wiki#simple-ui). You deal with high level concepts like "Pages" and "Items" rather than line and pixel coordinates.
 * Interrupt based rotary encoder and button handling. Keep your loop() free for other tasks.
 * Internally context and state aware. You don't need to track where you are in the menu system. Provide a callback to get notified of your own event.
 * Easy to extend with your custom pages and items.
@@ -52,7 +52,7 @@ struct DisplayData
 } displayData;
 
 // ##############################
-// Menus intialization and event handling
+// Menus initialisation and event handling
 // ##############################
 SH1106Wire display(0x3C, I2C_SDA_PIN, I2C_SCL_PIN);
 Container &container = Container::getInstance(display, ROT_INPUT_A, ROT_INPUT_B, ROT_INPUT_PSH);
