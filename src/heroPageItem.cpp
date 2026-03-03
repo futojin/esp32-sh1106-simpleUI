@@ -2,6 +2,7 @@
 
 #define DRAW_LABEL_HEIGHT 19
 #define DRAW_VALUE_HEIGHT 28
+#define DRAW_HIGHLIGHT_PADDING 2
 
 HeroPageItem::HeroPageItem(const char *label, void (*valueChangeResponder)(Item *item, const Event *event))
     : Item(label, valueChangeResponder)
@@ -27,7 +28,7 @@ void HeroPageItem::drawValueHighlight(u_int16_t idx)
 {
   m_display->setFont(ArialMT_Plain_24);
   uint16_t textWidth = m_display->getStringWidth(value);
-  int16_t x = (m_display->getWidth() / 2 - textWidth / 2) - 2; // -2 padding
+  int16_t x = (m_display->getWidth() / 2 - textWidth / 2) - DRAW_HIGHLIGHT_PADDING;
   int16_t y = DRAW_LABEL_HEIGHT;
-  m_display->drawRect(x, y, textWidth + 4, DRAW_VALUE_HEIGHT); // +2 padding
+  m_display->drawRect(x, y, textWidth + 2 * DRAW_HIGHLIGHT_PADDING, DRAW_VALUE_HEIGHT);
 }

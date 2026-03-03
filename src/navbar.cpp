@@ -19,7 +19,7 @@ void Navbar::draw(const Page &currentPage)
 
   // Draw on the bottom
   int height = m_display->getHeight();
-  int16_t y = height - ICON_SIZE - 1; //-1 for border
+  int16_t y = height - ICON_SIZE;
 
   for (const Page *thisPage : m_pages)
   {
@@ -28,7 +28,7 @@ void Navbar::draw(const Page &currentPage)
       continue;
     }
 
-    int16_t x = iconIdx * ICON_SIZE + 1;
+    int16_t x = iconIdx * ICON_SIZE;
     if (thisPage == &currentPage)
     {
       m_display->drawRect(x, y, ICON_SIZE, ICON_SIZE);

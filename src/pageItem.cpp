@@ -1,6 +1,6 @@
 #include "simpleUI.h"
 
-#define DRAW_X_MARGIN 3
+#define DRAW_X_MARGIN 1
 #define DRAW_ITEM_HEIGHT 13
 
 PageItem::PageItem(const char *label, void (*valueChangeResponder)(Item *item, const Event *event))
@@ -22,15 +22,15 @@ void PageItem::draw(u_int16_t idx)
 
 void PageItem::drawHighlight(u_int16_t idx)
 {
-  int16_t y = idx * DRAW_ITEM_HEIGHT + 1; // +1 for border
-  int16_t x = 1;
-  m_display->drawRect(x, y, m_display->getWidth() - 2, DRAW_ITEM_HEIGHT - 1); //-2 for border
+  int16_t y = idx * DRAW_ITEM_HEIGHT;
+  int16_t x = 0;
+  m_display->drawRect(x, y, m_display->getWidth(), DRAW_ITEM_HEIGHT);
 }
 
 void PageItem::drawValueHighlight(u_int16_t idx)
 {
-  int16_t y = idx * DRAW_ITEM_HEIGHT + 1; // +1 for border
+  int16_t y = idx * DRAW_ITEM_HEIGHT;
   int16_t textWidth = m_display->getStringWidth(value);
-  int16_t x = m_display->getWidth() - DRAW_X_MARGIN - textWidth - 2;             // -1 for border, -1 for padding
-  m_display->drawRect(x, y, textWidth + DRAW_X_MARGIN, DRAW_ITEM_HEIGHT - 1); // -1 for border
+  int16_t x = m_display->getWidth() - DRAW_X_MARGIN - textWidth - 2;
+  m_display->drawRect(x, y, m_display->getWidth() - x, DRAW_ITEM_HEIGHT);
 }
