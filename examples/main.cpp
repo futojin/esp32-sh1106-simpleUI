@@ -83,7 +83,7 @@ HeroPage mainPage(icon_bulb);
 ListPage settingsPage(icon_settings);
 
 StatusText text1("00:00");
-StatusText text2("World");
+StatusText text2("Temp 25°C");
 
 void setup()
 {

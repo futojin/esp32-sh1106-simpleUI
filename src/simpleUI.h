@@ -12,6 +12,11 @@
 #define DEBUG_SIMPLEUI(...)
 #endif
 
+// #define DEBUG_DEBOUNCE(fmt, ...) Serial.printf(fmt, ##__VA_ARGS__)
+#ifndef DEBUG_DEBOUNCE
+#define DEBUG_DEBOUNCE(...)
+#endif
+
 enum ROTARY_EVENT
 {
   ROTARY_EVENT_CW,
@@ -46,15 +51,18 @@ public:
   void (*onValueChange)(Item *item, const Event *event);
   bool isEnabled() const { return m_enabled; }
   void setEnabled(bool enabled) { m_enabled = enabled; }
+  void setOffset(uint16_t offsetX, uint16_t offsetY) { m_offsetX = offsetX; m_offsetY = offsetY; }
 
 protected:
   SH1106Wire *m_display;
   bool m_enabled;
+  uint16_t m_offsetX;
+  uint16_t m_offsetY;
 
   void onEvent(Event &event);
-  virtual void draw(u_int16_t idx, uint16_t offsetX = 0, uint16_t offsetY = 0) = 0;
-  virtual void drawHighlight(u_int16_t idx, uint16_t offsetX = 0, uint16_t offsetY = 0) = 0;
-  virtual void drawValueHighlight(u_int16_t idx, uint16_t offsetX = 0, uint16_t offsetY = 0) = 0;
+  virtual void draw(u_int16_t idx) = 0;
+  virtual void drawHighlight(u_int16_t idx) = 0;
+  virtual void drawValueHighlight(u_int16_t idx) = 0;
   void syncDisplay(SH1106Wire *display) { m_display = display; }
 };
 
@@ -64,9 +72,9 @@ public:
   PageItem(const char *label, void (*onValueChange)(Item *item, const Event *event));
 
 private:
-  void draw(u_int16_t idx, uint16_t offsetX = 0, uint16_t offsetY = 0) override;
-  void drawHighlight(u_int16_t idx, uint16_t offsetX = 0, uint16_t offsetY = 0) override;
-  void drawValueHighlight(u_int16_t idx, uint16_t offsetX = 0, uint16_t offsetY = 0) override;
+  void draw(u_int16_t idx) override;
+  void drawHighlight(u_int16_t idx) override;
+  void drawValueHighlight(u_int16_t idx) override;
 };
 
 class HeroPageItem : public Item
@@ -77,9 +85,9 @@ public:
   bool m_smallFont;
 
 private:
-  void draw(u_int16_t idx, uint16_t offsetX = 0, uint16_t offsetY = 0) override;
-  void drawHighlight(u_int16_t idx, uint16_t offsetX = 0, uint16_t offsetY = 0) override;
-  void drawValueHighlight(u_int16_t idx, uint16_t offsetX = 0, uint16_t offsetY = 0) override;
+  void draw(u_int16_t idx) override;
+  void drawHighlight(u_int16_t idx) override;
+  void drawValueHighlight(u_int16_t idx) override;
 };
 
 class Navbar
@@ -123,7 +131,7 @@ protected:
   uint16_t m_offsetX;
   uint16_t m_offsetY;
 
-  virtual void drawItems(uint16_t offsetX = 0, uint16_t offsetY = 0) = 0;
+  virtual void drawItems() = 0;
   virtual void syncDisplay() = 0;
   virtual void start() = 0;
   virtual void reset() = 0;
@@ -142,9 +150,9 @@ protected:
   // Helper functions to call Item's non-public methods from Page subclass without declaring them as friend.
   void item_onEvent(Item &item, Event &event) { item.onEvent(event); }
   void item_syncDisplay(Item &item) { item.syncDisplay(m_display); }
-  void item_draw(Item &item, u_int16_t idx, uint16_t offsetX = 0, uint16_t offsetY = 0) { item.draw(idx, offsetX, offsetY); }
-  void item_drawHighlight(Item &item, u_int16_t idx, uint16_t offsetX = 0, uint16_t offsetY = 0) { item.drawHighlight(idx, offsetX, offsetY); }
-  void item_drawValueHighlight(Item &item, u_int16_t idx, uint16_t offsetX = 0, uint16_t offsetY = 0) { item.drawValueHighlight(idx, offsetX, offsetY); }
+  void item_draw(Item &item, u_int16_t idx);
+  void item_drawHighlight(Item &item, u_int16_t idx) { item.drawHighlight(idx); }
+  void item_drawValueHighlight(Item &item, u_int16_t idx) { item.drawValueHighlight(idx); }
 
 private:
   void checkAndYield();
@@ -159,7 +167,7 @@ public:
 private:
   HeroPageItem *m_currentItem;
 
-  void drawItems(uint16_t offsetX = 0, uint16_t offsetY = 0) override;
+  void drawItems() override;
   void start() override;
   void syncDisplay() override;
   void reset() override;
@@ -179,7 +187,7 @@ private:
 
   bool nextItem();
   bool prevItem();
-  void drawItems(uint16_t offsetX = 0, uint16_t offsetY = 0) override;
+  void drawItems() override;
   void start() override;
   void onPageEvent(Event &event) override;
   void onItemEvent(Event &event) override;

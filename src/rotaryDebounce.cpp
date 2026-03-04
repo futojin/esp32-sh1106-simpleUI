@@ -50,8 +50,8 @@ void handleRotaryCallbackTask(void *parameter)
     RotaryDebounce::CallbackTaskParams params;
     if (xQueueReceive(callbackQueue, &params, portMAX_DELAY))
     {
-      DEBUG_SIMPLEUI("RotaryDebounce Event: %d\n", params.event);
-      DEBUG_SIMPLEUI("--------------------------------------------\n");
+      DEBUG_DEBOUNCE("RotaryDebounce Event: %d\n", params.event);
+      DEBUG_DEBOUNCE("--------------------------------------------\n");
       params.debounceInstance->onRotaryEvent(params.event);
     }
   }
@@ -82,7 +82,7 @@ RotaryDebounce::~RotaryDebounce()
 
 void RotaryDebounce::start()
 {
-  DEBUG_SIMPLEUI("Starting RotaryDebounce on pins A(%d), B(%d)\n", m_pinA, m_pinB);
+  DEBUG_DEBOUNCE("Starting RotaryDebounce on pins A(%d), B(%d)\n", m_pinA, m_pinB);
   attachInterruptArg(digitalPinToInterrupt(m_pinA), rotary_isr, (void *)this, CHANGE);
   attachInterruptArg(digitalPinToInterrupt(m_pinB), rotary_isr, (void *)this, CHANGE);
 }
@@ -118,12 +118,12 @@ void RotaryDebounce::abInterrupt(unsigned long currentMs)
   int pinBState = digitalRead(m_pinB);
   if (m_rotaryState.phase != RESET && currentMs - m_rotaryState.startMs > MAX_ROTARY_STATE_TRANSITION_MS)
   {
-    DEBUG_SIMPLEUI("Timeout exceeded. (%lu ms)\n", currentMs - m_rotaryState.startMs);
+    DEBUG_DEBOUNCE("Timeout exceeded. (%lu ms)\n", currentMs - m_rotaryState.startMs);
     resetState();
   }
 
-  DEBUG_SIMPLEUI("abInterrupt: A=%d, B=%d\n", pinAState, pinBState);
-  DEBUG_SIMPLEUI("Current Phase: %d\n", m_rotaryState.phase);
+  DEBUG_DEBOUNCE("abInterrupt: A=%d, B=%d\n", pinAState, pinBState);
+  DEBUG_DEBOUNCE("Current Phase: %d\n", m_rotaryState.phase);
 
   switch (m_rotaryState.phase)
   {
@@ -168,7 +168,7 @@ void RotaryDebounce::abInterrupt(unsigned long currentMs)
     break;
   }
 
-  DEBUG_SIMPLEUI("New Phase: %d, direction: %d\n", m_rotaryState.phase, m_rotaryState.direction);
+  DEBUG_DEBOUNCE("New Phase: %d, direction: %d\n", m_rotaryState.phase, m_rotaryState.direction);
   if (m_rotaryState.phase == S4)
   {
     ROTARY_EVENT event = m_rotaryState.direction;

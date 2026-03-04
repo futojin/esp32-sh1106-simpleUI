@@ -49,8 +49,8 @@ void handleSwitchDebounceCallbackTask(void *param)
     SwitchDebounce *debounceInstance;
     if (xQueueReceive(switchDebounceCallbackQueue, &debounceInstance, portMAX_DELAY))
     {
-      DEBUG_SIMPLEUI("SwitchDebounce Callback: pin %d state %d\n", debounceInstance->m_pin, debounceInstance->m_lastPinState);
-      DEBUG_SIMPLEUI("--------------------------------------------\n");
+      DEBUG_DEBOUNCE("SwitchDebounce Callback: pin %d state %d\n", debounceInstance->m_pin, debounceInstance->m_lastPinState);
+      DEBUG_DEBOUNCE("--------------------------------------------\n");
       // Call the user-defined callback
       debounceInstance->onSwitchEvent(debounceInstance->m_lastPinState);
     }
@@ -93,7 +93,7 @@ SwitchDebounce::~SwitchDebounce()
 
 void SwitchDebounce::start()
 {
-  DEBUG_SIMPLEUI("SwitchDebounce::start on pin %d\n", m_pin);
+  DEBUG_DEBOUNCE("SwitchDebounce::start on pin %d\n", m_pin);
 
   m_lastPinState = digitalRead(m_pin);
 

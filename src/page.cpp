@@ -19,8 +19,14 @@ void Page::setOffset(uint16_t offsetX, uint16_t offsetY)
 void Page::draw()
 {
   DEBUG_SIMPLEUI("Page::draw\n");
-  drawItems(m_offsetX, m_offsetY);
+  drawItems();
   drawSaveActions();
+}
+
+void Page::item_draw(Item &item, u_int16_t idx)
+{
+  item.setOffset(m_offsetX, m_offsetY);
+  item.draw(idx);
 }
 
 void Page::checkAndYield()

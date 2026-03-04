@@ -4,7 +4,9 @@ Item::Item(const char *label, void (*valueChangeResponder)(Item *item, const Eve
     : m_label(label),
       m_display(nullptr),
       onValueChange(valueChangeResponder),
-      m_enabled(true)
+      m_enabled(true),
+      m_offsetX(0),
+      m_offsetY(0)
 {
 }
 
