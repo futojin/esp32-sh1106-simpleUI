@@ -115,12 +115,12 @@ void Container::initDisplay(bool flipVertical)
 
 void Container::addPage(Page &childPage)
 {
-  childPage.m_display = this->m_display;
+  childPage.setDisplay(*m_display);
   childPage.syncDisplay();
   m_pages.push_back(&childPage);
   m_navbar.addPage(childPage);
   updatePageOffset();
-  childPage.m_container = this;
+  childPage.setContainer(*this);
 
   if (m_currentPage == nullptr) // If this is the first page, assume current
   {

@@ -41,8 +41,6 @@ struct Event
 
 class Item
 {
-  friend class Page;
-
 public:
   char *value;
   const char *m_label;
@@ -51,19 +49,22 @@ public:
   void (*onValueChange)(Item *item, const Event *event);
   bool isEnabled() const { return m_enabled; }
   void setEnabled(bool enabled) { m_enabled = enabled; }
-  void setOffset(uint16_t offsetX, uint16_t offsetY) { m_offsetX = offsetX; m_offsetY = offsetY; }
+  void setOffset(uint16_t offsetX, uint16_t offsetY)
+  {
+    m_offsetX = offsetX;
+    m_offsetY = offsetY;
+  }
+  void onEvent(Event &event);
+  virtual void draw(u_int16_t idx) = 0;
+  virtual void drawHighlight(u_int16_t idx) = 0;
+  virtual void drawValueHighlight(u_int16_t idx) = 0;
+  void syncDisplay(SH1106Wire *display) { m_display = display; }
 
 protected:
   SH1106Wire *m_display;
   bool m_enabled;
   uint16_t m_offsetX;
   uint16_t m_offsetY;
-
-  void onEvent(Event &event);
-  virtual void draw(u_int16_t idx) = 0;
-  virtual void drawHighlight(u_int16_t idx) = 0;
-  virtual void drawValueHighlight(u_int16_t idx) = 0;
-  void syncDisplay(SH1106Wire *display) { m_display = display; }
 };
 
 class PageItem : public Item
@@ -71,7 +72,6 @@ class PageItem : public Item
 public:
   PageItem(const char *label, void (*onValueChange)(Item *item, const Event *event));
 
-private:
   void draw(u_int16_t idx) override;
   void drawHighlight(u_int16_t idx) override;
   void drawValueHighlight(u_int16_t idx) override;
@@ -81,36 +81,32 @@ class HeroPageItem : public Item
 {
 public:
   HeroPageItem(const char *label, void (*onValueChange)(Item *item, const Event *event));
-
-  bool m_smallFont;
-
-private:
   void draw(u_int16_t idx) override;
   void drawHighlight(u_int16_t idx) override;
   void drawValueHighlight(u_int16_t idx) override;
+  void useSmallFont(bool smallFont) { m_smallFont = smallFont; }
+
+  private:
+    bool m_smallFont;
 };
 
 class Navbar
 {
-  friend class Container;
-
 public:
+  Navbar(SH1106Wire &display, Container &container);
+  void addPage(Page &page);
+  void draw(const Page &currentPage);
+  void onEvent(Event &event);
+
 private:
   SH1106Wire *m_display;
   std::vector<Page *> m_pages;
   CONTEXT m_context;
   Container *m_container;
-
-  Navbar(SH1106Wire &display, Container &container);
-  void addPage(Page &page);
-  void draw(const Page &currentPage);
-  void onEvent(Event &event);
 };
 
 class Page
 {
-  friend class Container;
-
 public:
   Page(const unsigned char *icon);
   void enable(bool enabled) { m_enabled = enabled; }
@@ -118,8 +114,14 @@ public:
   void enableSaveActions(void (*onSave)(), void (*onExit)());
   void disableSaveActions();
   void setOffset(uint16_t offsetX, uint16_t offsetY);
-
   const unsigned char *getIcon() const { return m_icon; }
+  void setContainer(Container &container) { m_container = &container; }
+  void setDisplay(SH1106Wire &display) { m_display = &display; }
+  void draw();
+  void onEvent(Event &event);
+  virtual void start() = 0;
+  virtual void syncDisplay() = 0;
+  virtual void reset() = 0;
 
 protected:
   SH1106Wire *m_display;
@@ -132,22 +134,16 @@ protected:
   uint16_t m_offsetY;
 
   virtual void drawItems() = 0;
-  virtual void syncDisplay() = 0;
-  virtual void start() = 0;
-  virtual void reset() = 0;
   virtual void onPageEvent(Event &event) = 0;
   virtual void onItemEvent(Event &event) = 0;
-
   void drawSaveActions();
-  void draw();
-  void onEvent(Event &event);
   void onSaveEvent(Event &event);
   void onExitEvent(Event &event);
 
   void (*onSave)();
   void (*onExit)();
 
-  // Helper functions to call Item's non-public methods from Page subclass without declaring them as friend.
+  // Helper functions to call Item's methods from Page subclass without explicit reference to an Item subclass.
   void item_onEvent(Item &item, Event &event) { item.onEvent(event); }
   void item_syncDisplay(Item &item) { item.syncDisplay(m_display); }
   void item_draw(Item &item, u_int16_t idx);
@@ -237,8 +233,6 @@ private:
 
 class Container
 {
-  friend class Navbar;
-  friend class Page;
   friend void onContainerRotaryEvent(ROTARY_EVENT rEvent);
   friend void onContainerSwitchEvent(u_int8_t pinState);
 
@@ -261,6 +255,7 @@ public:
   void flipDisplay(bool flipVertical);
   void addStatus(Status &status);
   bool isStatusBarEnabled() const { return m_statusBarEnabled; }
+  void onEventYield(Event &event);
 
 private:
   struct WatchdogTaskParams
@@ -290,7 +285,7 @@ private:
 
   void drawOverlay();
   void trackCurrentPage(ROTARY_EVENT rEvent);
-  void onEventYield(Event &event);
+
   void createWatchdogTask();
   static void onWatchdogTask(void *parameter);
   void screenSaverTask(WatchdogTaskParams *params);
