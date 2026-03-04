@@ -74,6 +74,8 @@ class HeroPageItem : public Item
 public:
   HeroPageItem(const char *label, void (*onValueChange)(Item *item, const Event *event));
 
+  bool m_smallFont;
+
 private:
   void draw(u_int16_t idx, uint16_t offsetX = 0, uint16_t offsetY = 0) override;
   void drawHighlight(u_int16_t idx, uint16_t offsetX = 0, uint16_t offsetY = 0) override;

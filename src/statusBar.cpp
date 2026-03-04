@@ -21,6 +21,7 @@ void StatusBar::addStatus(Status &status)
 
 void StatusBar::draw()
 {
+  m_display->drawLine(0, ArialMT_Plain_10[1], m_display->getWidth(), ArialMT_Plain_10[1]);
   for (Status *status : m_statuses)
   {
     status->draw();

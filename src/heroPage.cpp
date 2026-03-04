@@ -67,7 +67,8 @@ void HeroPage::drawItems(uint16_t offsetX, uint16_t offsetY)
   DEBUG_SIMPLEUI("HeroPage::drawItems\n");
   if (m_currentItem->isEnabled())
   {
-    item_draw(*m_currentItem, 0, offsetX, offsetY); // HeroPageItem doesn't use idx
+    m_currentItem->m_smallFont = m_container->isStatusBarEnabled(); // Use smaller font if status bar is enabled to avoid overlap
+    item_draw(*m_currentItem, 0, offsetX, offsetY);                 // HeroPageItem doesn't use idx
 
     if (m_context == PAGE || m_context == ITEM)
     {
