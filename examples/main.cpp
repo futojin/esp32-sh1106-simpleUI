@@ -60,24 +60,24 @@ void onHandleBrightnessChange(Item *item, const Event *event)
 }
 
 HeroPageItem brightnessHeroItem("Brightness", onHandleBrightnessChange);
-PageItem brightnessItem("LED Brightness", onHandleBrightnessChange);
-PageItem flipDisplayItem("Flip Display", [](Item *item, const Event *event)
-                         {
-                           static char flipValue[4];
-                           if (event->eventId == EVENT_ROT)
-                           {
-                             if (event->value == ROTARY_EVENT_CW || event->value == ROTARY_EVENT_CCW)
+ListPageItem brightnessItem("LED Brightness", onHandleBrightnessChange);
+ListPageItem flipDisplayItem("Flip Display", [](Item *item, const Event *event)
                              {
-                               displayData.flipDisplay = !displayData.flipDisplay; // Toggle flip state
-                               container.flipDisplay(displayData.flipDisplay);     // Apply
-                             }
-                           }
-                           DEBUG_("Flip Display toggled to: %s\n", displayData.flipDisplay ? "ON" : "OFF");
-                           sprintf(flipValue, "%s", displayData.flipDisplay ? "ON" : "OFF"); // Convert to string to update display
-                           item->value = flipValue;                                          // Update display value
-                         });
-PageItem dummyItem("Test 1", onHandleBrightnessChange);
-PageItem dummyItem2("Test 2", onHandleBrightnessChange);
+                               static char flipValue[4];
+                               if (event->eventId == EVENT_ROT)
+                               {
+                                 if (event->value == ROTARY_EVENT_CW || event->value == ROTARY_EVENT_CCW)
+                                 {
+                                   displayData.flipDisplay = !displayData.flipDisplay; // Toggle flip state
+                                   container.flipDisplay(displayData.flipDisplay);     // Apply
+                                 }
+                               }
+                               DEBUG_("Flip Display toggled to: %s\n", displayData.flipDisplay ? "ON" : "OFF");
+                               sprintf(flipValue, "%s", displayData.flipDisplay ? "ON" : "OFF"); // Convert to string to update display
+                               item->value = flipValue;                                          // Update display value
+                             });
+ListPageItem dummyItem("Test 1", onHandleBrightnessChange);
+ListPageItem dummyItem2("Test 2", onHandleBrightnessChange);
 
 HeroPage mainPage(icon_bulb);
 ListPage settingsPage(icon_settings);

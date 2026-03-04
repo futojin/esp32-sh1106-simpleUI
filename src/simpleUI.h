@@ -7,7 +7,7 @@
 #include <vector>
 #include <list>
 
-// #define DEBUG_SIMPLEUI(fmt, ...) Serial.printf(fmt, ##__VA_ARGS__)
+#define DEBUG_SIMPLEUI(fmt, ...) Serial.printf(fmt, ##__VA_ARGS__)
 #ifndef DEBUG_SIMPLEUI
 #define DEBUG_SIMPLEUI(...)
 #endif
@@ -67,10 +67,10 @@ protected:
   uint16_t m_offsetY;
 };
 
-class PageItem : public Item
+class ListPageItem : public Item
 {
 public:
-  PageItem(const char *label, void (*onValueChange)(Item *item, const Event *event));
+  ListPageItem(const char *label, void (*onValueChange)(Item *item, const Event *event));
 
   void draw(u_int16_t idx) override;
   void drawHighlight(u_int16_t idx) override;
@@ -86,8 +86,8 @@ public:
   void drawValueHighlight(u_int16_t idx) override;
   void useSmallFont(bool smallFont) { m_smallFont = smallFont; }
 
-  private:
-    bool m_smallFont;
+private:
+  bool m_smallFont;
 };
 
 class Navbar
@@ -175,11 +175,11 @@ class ListPage : public Page
 {
 public:
   ListPage(const unsigned char *icon) : Page(icon) {}
-  void addItem(PageItem &pageItem);
+  void addItem(ListPageItem &pageItem);
 
 private:
-  std::list<PageItem *> m_pageItems;
-  std::list<PageItem *>::iterator m_currentItemIt;
+  std::list<ListPageItem *> m_pageItems;
+  std::list<ListPageItem *>::iterator m_currentItemIt;
 
   bool nextItem();
   bool prevItem();
@@ -271,7 +271,6 @@ private:
   std::vector<Page *> m_pages;
   u_int8_t m_idx;
   TaskHandle_t m_watchdogTaskHandle;
-  u_int8_t m_screenBrightness;
   u_int8_t m_screenSaverTimeoutSec;
   volatile unsigned long m_lastActivityMs;
   RotaryDebounce *m_rotaryDebounce;

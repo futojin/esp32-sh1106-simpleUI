@@ -3,7 +3,7 @@
 #define DRAW_MARGIN 2
 #define DRAW_SPACING 2
 #define MAX_DISPLAY_BRIGHTNESS 128
-#define MIN_DISPLAY_BRIGHTNESS 15
+#define MIN_DISPLAY_BRIGHTNESS 40
 #define MIN_SCREEN_SAVER_TIMEOUT_SEC 5
 #define STATUS_BAR_HEIGHT 13
 
@@ -40,8 +40,7 @@ Container::Container(SH1106Wire &display)
       m_context(NAVBAR),
       m_idx(0),
       m_watchdogTaskHandle(nullptr),
-      m_screenBrightness(MAX_DISPLAY_BRIGHTNESS), // Initialize to full brightness
-      m_screenSaverTimeoutSec(0),                 // Initialize screen saver timeout to 0 (disabled)
+      m_screenSaverTimeoutSec(0), // Initialize screen saver timeout to 0 (disabled)
       m_lastActivityMs(millis()),
       m_statusBar(display),
       m_statusBarEnabled(false),
@@ -185,9 +184,9 @@ void Container::onEvent(Event &event)
   // Reset activity time and brightness on any user interaction
   m_lastActivityMs = millis();
 
-  if (m_screenBrightness < MAX_DISPLAY_BRIGHTNESS) // Don't unnecessarily change brightness as it make the display flicker
+  if (m_screenSaverActive)
   {
-    m_screenBrightness = MAX_DISPLAY_BRIGHTNESS;
+    m_screenSaverActive = false;
     m_display->setBrightness(MAX_DISPLAY_BRIGHTNESS);
     draw();
     DEBUG_SIMPLEUI("Container::onEvent: Woke from screen saver, ignoring event\n");
@@ -338,22 +337,13 @@ void Container::screenSaverTask(WatchdogTaskParams *params)
   unsigned long lastActivity = m_lastActivityMs;
   u_int32_t currentTime = millis();
   u_int32_t elapsedMs = currentTime - lastActivity;
-  if (elapsedMs >= timeoutMs)
+  if (elapsedMs >= timeoutMs && !m_screenSaverActive)
   {
     m_screenSaverActive = true;
-    if (m_screenBrightness > MIN_DISPLAY_BRIGHTNESS)
-    {
-      m_screenBrightness = MIN_DISPLAY_BRIGHTNESS;
-
-      m_display->setBrightness(MIN_DISPLAY_BRIGHTNESS);
-      m_display->clear();
-      drawOverlay();
-      m_display->display();
-    }
-  }
-  else
-  {
-    m_screenSaverActive = false;
+    m_display->setBrightness(MIN_DISPLAY_BRIGHTNESS);
+    m_display->clear();
+    drawOverlay();
+    m_display->display();
   }
 }
 

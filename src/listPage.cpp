@@ -2,7 +2,7 @@
 
 #define DRAW_LIST_SIZE 3
 
-void ListPage::addItem(PageItem &item)
+void ListPage::addItem(ListPageItem &item)
 {
   m_pageItems.push_back(&item);
   item_syncDisplay(item);
@@ -171,7 +171,7 @@ bool ListPage::nextItem()
     return false;
   }
 
-  std::list<PageItem *>::iterator nextIt = m_currentItemIt;
+  std::list<ListPageItem *>::iterator nextIt = m_currentItemIt;
   do
   {
     ++nextIt;
@@ -198,7 +198,7 @@ bool ListPage::prevItem()
     return false; // Already at beginning
   }
 
-  std::list<PageItem *>::iterator prevIt = m_currentItemIt;
+  std::list<ListPageItem *>::iterator prevIt = m_currentItemIt;
   do
   {
     --prevIt;
