@@ -169,7 +169,7 @@ void RotaryDebounce::abInterrupt(unsigned long currentMs)
   }
 
   DEBUG_DEBOUNCE("New Phase: %d, direction: %d\n", m_rotaryState.phase, m_rotaryState.direction);
-  if (m_rotaryState.phase == S4)
+  if (m_rotaryState.phase == S4 || m_rotaryState.phase == S3) //FIX: sometimes S4 not detected, so S3 is also far enough for a valid event completion
   {
     ROTARY_EVENT event = m_rotaryState.direction;
     resetState();

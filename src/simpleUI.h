@@ -7,7 +7,7 @@
 #include <vector>
 #include <list>
 
-#define DEBUG_SIMPLEUI(fmt, ...) Serial.printf(fmt, ##__VA_ARGS__)
+// #define DEBUG_SIMPLEUI(fmt, ...) Serial.printf(fmt, ##__VA_ARGS__)
 #ifndef DEBUG_SIMPLEUI
 #define DEBUG_SIMPLEUI(...)
 #endif
