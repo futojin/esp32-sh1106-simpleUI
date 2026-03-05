@@ -194,16 +194,19 @@ private:
 class Status
 {
 public:
-  Status();
+  Status(OLEDDISPLAY_TEXT_ALIGNMENT alignment = TEXT_ALIGN_LEFT, uint16_t minWidth = 0);
 
   void setDisplay(SH1106Wire &display) { m_display = &display; }
   void setPosition(uint16_t posX, uint16_t posY);
-  virtual void draw() = 0;
+  OLEDDISPLAY_TEXT_ALIGNMENT getAlignment() { return m_alignment; }
+  virtual uint16_t draw() = 0;
 
 protected:
-  uint16_t posX;
-  uint16_t posY;
+  uint16_t m_posX;
+  uint16_t m_posY;
+  uint16_t m_minWidth;
   SH1106Wire *m_display;
+  OLEDDISPLAY_TEXT_ALIGNMENT m_alignment;
 };
 
 class StatusBar
@@ -216,16 +219,19 @@ public:
 
 private:
   SH1106Wire *m_display;
-  std::vector<Status *> m_statuses;
+  std::vector<Status *> m_l_statuses;
+  std::vector<Status *> m_r_statuses;
 };
 
 class StatusText : public Status
 {
 public:
-  StatusText(const char *text);
+  StatusText(const char *text, OLEDDISPLAY_TEXT_ALIGNMENT alignment = TEXT_ALIGN_LEFT, uint16_t minWidth = 0);
 
+  void setText(const String &text) { m_text = text.c_str(); }
   void setText(const char *text) { m_text = text; }
-  void draw() override;
+  const char *getText() const { return m_text; }
+  uint16_t draw() override;
 
 private:
   const char *m_text;

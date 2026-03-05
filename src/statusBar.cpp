@@ -1,5 +1,7 @@
 #include "simpleUI.h"
 
+#define SEPARATOR_WIDTH 3
+
 StatusBar::StatusBar(SH1106Wire &display)
     : m_display(&display)
 {
@@ -8,22 +10,31 @@ StatusBar::StatusBar(SH1106Wire &display)
 void StatusBar::addStatus(Status &status)
 {
   status.setDisplay(*m_display);
-  m_statuses.push_back(&status);
-
-  uint32_t count = m_statuses.size();
-  uint32_t slotWidth = m_display->getWidth() / count;
-
-  for (uint32_t i = 0; i < count; i++)
+  if (status.getAlignment() == TEXT_ALIGN_LEFT)
   {
-    m_statuses[i]->setPosition(i * slotWidth, 0);
+    m_l_statuses.push_back(&status);
+  }
+  else
+  {
+    m_r_statuses.push_back(&status);
   }
 }
 
 void StatusBar::draw()
 {
   m_display->drawLine(0, ArialMT_Plain_10[1], m_display->getWidth(), ArialMT_Plain_10[1]);
-  for (Status *status : m_statuses)
+
+  uint16_t offsetX = 0;
+  for (Status *status : m_l_statuses)
   {
-    status->draw();
+    status->setPosition(offsetX, 0);
+    offsetX += status->draw() + SEPARATOR_WIDTH;
+  }
+
+  offsetX = m_display->getWidth();
+  for (Status *status : m_r_statuses)
+  {
+    status->setPosition(offsetX, 0);
+    offsetX -= status->draw() + SEPARATOR_WIDTH;
   }
 }

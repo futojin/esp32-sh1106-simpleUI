@@ -82,8 +82,9 @@ ListPageItem dummyItem2("Test 2", onHandleBrightnessChange);
 HeroPage mainPage(icon_bulb);
 ListPage settingsPage(icon_settings);
 
-StatusText text1("00:00");
-StatusText text2("Temp 25°C");
+StatusText timeStatus("00:00");
+StatusText tempStatus("25°C", TEXT_ALIGN_RIGHT);
+StatusText hotStatus("", TEXT_ALIGN_RIGHT, 9);
 
 void setup()
 {
@@ -104,8 +105,9 @@ void setup()
   settingsPage.addItem(dummyItem);
   settingsPage.addItem(dummyItem2);
 
-  container.addStatus(text1);
-  container.addStatus(text2);
+  container.addStatus(timeStatus);
+  container.addStatus(hotStatus);
+  container.addStatus(tempStatus);
 
   container.enableScreenSaver(60);
   container.enableOverlay(false);
@@ -118,16 +120,40 @@ void loop()
 {
   static unsigned long lastUpdate = 0;
   static char timeStr[6]; // "mm:ss\0"
+  static char tempStr[8]; // "000°C\0"
+  static uint16_t temp = 25;
 
   unsigned long now = millis();
-  if (now - lastUpdate >= 1000 && lastUpdate != now)
+  if (now - lastUpdate >= 1000)
   {
     lastUpdate = now;
     unsigned long totalSeconds = now / 1000;
     unsigned long minutes = (totalSeconds / 60) % 60;
     unsigned long seconds = totalSeconds % 60;
     sprintf(timeStr, "%02lu:%02lu", minutes, seconds);
-    text1.setText(timeStr);
+    timeStatus.setText(timeStr);
+
+    temp = min(temp + random(1, 4), 220L);
+    sprintf(tempStr, "%u°C", temp);
+    tempStatus.setText(tempStr);
+
+    if (temp >= 150)
+    {
+      hotStatus.setText(strlen(hotStatus.getText()) != 0 ? "" : "!!!");
+    }
+    else if (temp >= 100)
+    {
+      hotStatus.setText("!!");
+    }
+    else if (temp >= 50)
+    {
+      hotStatus.setText("!");
+    }
+    else
+    {
+      hotStatus.setText("");
+    }
+
     container.draw();
   }
 }
